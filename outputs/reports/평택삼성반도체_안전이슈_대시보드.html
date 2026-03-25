@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>평택 삼성 반도체 시공현장 안전 대시보드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg-primary:   #080b12;
+    --bg-card:      #0d1220;
+    --bg-card2:     #111828;
+    --border:       #1e2d4a;
+    --border-glow:  #1a3a6e;
+    --red:          #ff2841;
+    --red-dim:      #7a0f1d;
+    --amber:        #ffab00;
+    --amber-dim:    #6b4500;
+    --green:        #00e676;
+    --green-dim:    #004d2a;
+    --blue:         #2979ff;
+    --blue-dim:     #0d2466;
+    --cyan:         #00e5ff;
+    --text-primary: #e8edf5;
+    --text-muted:   #5a7099;
+    --text-dim:     #8a9bbf;
+    --grid:         rgba(30,45,74,0.4);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── 배경 격자 패턴 ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(29,64,120,0.18) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+
+  /* ══════════════════════════════
+     헤더
+  ══════════════════════════════ */
+  header {
+    position: relative;
+    padding: 40px 0 32px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 36px;
+    overflow: hidden;
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 340px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--red), transparent);
+  }
+
+  .header-left {}
+
+  .site-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,40,65,0.12);
+    border: 1px solid rgba(255,40,65,0.35);
+    border-radius: 3px;
+    padding: 4px 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--red);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .site-badge::before {
+    content: '';
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--red);
+    box-shadow: 0 0 8px var(--red);
+    animation: pulse-dot 1.8s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(26px, 3vw, 40px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    color: var(--text-primary);
+  }
+
+  h1 span {
+    display: block;
+    font-size: 0.52em;
+    font-weight: 500;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    margin-top: 6px;
+  }
+
+  .header-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    padding-top: 6px;
+  }
+
+  .header-meta strong {
+    color: var(--cyan);
+    font-size: 13px;
+  }
+
+  /* ══════════════════════════════
+     KPI 카드
+  ══════════════════════════════ */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+
+  .kpi-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 20px 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+    cursor: default;
+  }
+
+  .kpi-card:hover { border-color: var(--border-glow); }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .kpi-card.danger::before { background: var(--red); }
+  .kpi-card.warning::before { background: var(--amber); }
+  .kpi-card.safe::before { background: var(--green); }
+  .kpi-card.info::before { background: var(--blue); }
+  .kpi-card.cyan::before { background: var(--cyan); }
+
+  .kpi-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .kpi-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 44px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .kpi-card.danger .kpi-value  { color: var(--red); }
+  .kpi-card.warning .kpi-value { color: var(--amber); }
+  .kpi-card.safe .kpi-value    { color: var(--green); }
+  .kpi-card.info .kpi-value    { color: var(--blue); }
+  .kpi-card.cyan .kpi-value    { color: var(--cyan); }
+
+  .kpi-sub {
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .kpi-icon {
+    position: absolute;
+    bottom: 14px;
+    right: 16px;
+    font-size: 28px;
+    opacity: 0.12;
+  }
+
+  /* ══════════════════════════════
+     그리드 레이아웃
+  ══════════════════════════════ */
+  .charts-grid {
+    display: grid;
+    gap: 20px;
+  }
+
+  .row-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .row-3 {
+    grid-template-columns: 1.4fr 1fr 1fr;
+  }
+  .row-full {
+    grid-template-columns: 1fr;
+  }
+
+  /* ══════════════════════════════
+     차트 카드
+  ══════════════════════════════ */
+  .chart-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .chart-card:hover { border-color: var(--border-glow); }
+
+  /* 코너 장식 */
+  .chart-card::before,
+  .chart-card::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    border-color: var(--border-glow);
+    border-style: solid;
+    opacity: 0.6;
+  }
+  .chart-card::before { top: 6px; left: 6px; border-width: 2px 0 0 2px; }
+  .chart-card::after  { bottom: 6px; right: 6px; border-width: 0 2px 2px 0; }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .card-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-primary);
+    text-transform: uppercase;
+  }
+
+  .card-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.04em;
+  }
+
+  .card-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .tag-red    { background: rgba(255,40,65,0.15); color: var(--red); border: 1px solid rgba(255,40,65,0.3); }
+  .tag-amber  { background: rgba(255,171,0,0.12); color: var(--amber); border: 1px solid rgba(255,171,0,0.3); }
+  .tag-green  { background: rgba(0,230,118,0.1);  color: var(--green); border: 1px solid rgba(0,230,118,0.25); }
+  .tag-blue   { background: rgba(41,121,255,0.12); color: #6fa8ff; border: 1px solid rgba(41,121,255,0.3); }
+  .tag-cyan   { background: rgba(0,229,255,0.1);  color: var(--cyan); border: 1px solid rgba(0,229,255,0.25); }
+
+  .chart-wrap {
+    position: relative;
+  }
+
+  /* ══════════════════════════════
+     타임라인 테이블
+  ══════════════════════════════ */
+  .timeline-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .timeline-table th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .timeline-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid rgba(30,45,74,0.5);
+    color: var(--text-dim);
+    font-size: 12px;
+    vertical-align: middle;
+  }
+
+  .timeline-table tr:hover td { background: rgba(30,45,74,0.3); }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+
+  .badge-1out   { background: rgba(255,40,65,0.2);  color: var(--red);   border: 1px solid rgba(255,40,65,0.4); }
+  .badge-2out   { background: rgba(255,171,0,0.18); color: var(--amber); border: 1px solid rgba(255,171,0,0.4); }
+  .badge-major  { background: rgba(180,0,40,0.3);   color: #ff6680;      border: 1px solid rgba(255,40,65,0.6); }
+  .badge-warn   { background: rgba(0,229,255,0.12); color: var(--cyan);  border: 1px solid rgba(0,229,255,0.3); }
+
+  .risk-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .risk-dot::before {
+    content: '';
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .risk-dot.high::before  { background: var(--red);   box-shadow: 0 0 6px var(--red); }
+  .risk-dot.mid::before   { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+  .risk-dot.low::before   { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+  /* ══════════════════════════════
+     범례
+  ══════════════════════════════ */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .legend-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ══════════════════════════════
+     진행 바
+  ══════════════════════════════ */
+  .prog-list { display: flex; flex-direction: column; gap: 13px; }
+
+  .prog-item {}
+
+  .prog-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 12px;
+  }
+
+  .prog-name { color: var(--text-dim); }
+  .prog-val  {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  .prog-track {
+    height: 6px;
+    background: rgba(30,45,74,0.8);
+    border-radius: 1px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .prog-fill {
+    height: 100%;
+    border-radius: 1px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* ══════════════════════════════
+     애니메이션
+  ══════════════════════════════ */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @keyframes scan {
+    0%   { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+
+  .scanline {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(transparent, rgba(0,229,255,0.06), transparent);
+    animation: scan 6s linear infinite;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ══════════════════════════════
+     레이더 차트 래퍼 중앙정렬
+  ══════════════════════════════ */
+  .radar-wrap {
+    display: flex;
+    justify-content: center;
+  }
+
+  /* ══════════════════════════════
+     섹션 구분선
+  ══════════════════════════════ */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 36px 0 20px;
+  }
+  .section-divider::before,
+  .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /* 반응형 */
+  @media (max-width: 1100px) {
+    .row-3 { grid-template-columns: 1fr 1fr; }
+    .kpi-row { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 700px) {
+    .row-2, .row-3 { grid-template-columns: 1fr; }
+    .kpi-row { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="scanline"></div>
+
+<div class="container">
+
+  <!-- ── 헤더 ── -->
+  <header class="fade-up">
+    <div class="header-left">
+      <div class="site-badge">LIVE SAFETY MONITOR · P4 Ph4 FAB</div>
+      <h1>
+        평택 삼성 반도체 시공현장
+        <span>SAFETY ISSUE ANALYSIS DASHBOARD</span>
+      </h1>
+    </div>
+    <div class="header-meta">
+      <strong>백산이엔지 · P4 Ph4 (FAB)</strong>
+      <span>분석 기간: 2026.03.10 ~ 2026.03.23</span>
+      <span>품질안전공정회의 CCTV 모니터링 자료</span>
+      <span style="color:#ff2841; margin-top:4px;">⚠ 중대재해 1건 포함</span>
+    </div>
+  </header>
+
+  <!-- ── KPI 카드 ── -->
+  <div class="kpi-row fade-up">
+    <div class="kpi-card danger">
+      <div class="kpi-label">총 안전 이슈 케이스</div>
+      <div class="kpi-value" id="kpi1">32</div>
+      <div class="kpi-sub">10개 대분류</div>
+      <div class="kpi-icon">📋</div>
+    </div>
+    <div class="kpi-card danger">
+      <div class="kpi-label">위험수준 <span style="color:var(--red)">상</span></div>
+      <div class="kpi-value">17</div>
+      <div class="kpi-sub">전체의 53.1%</div>
+      <div class="kpi-icon">🔴</div>
+    </div>
+    <div class="kpi-card warning">
+      <div class="kpi-label">원아웃 (1·2 OUT)</div>
+      <div class="kpi-value">10</div>
+      <div class="kpi-sub">14건 페널티 중</div>
+      <div class="kpi-icon">🚫</div>
+    </div>
+    <div class="kpi-card safe">
+      <div class="kpi-label">중대사고 발생</div>
+      <div class="kpi-value">1</div>
+      <div class="kpi-sub">그레이팅 추락 (03.23)</div>
+      <div class="kpi-icon">🏥</div>
+    </div>
+    <div class="kpi-card cyan">
+      <div class="kpi-label">분석 기간 (일)</div>
+      <div class="kpi-value">14</div>
+      <div class="kpi-sub">03.10 ~ 03.23</div>
+      <div class="kpi-icon">📅</div>
+    </div>
+  </div>
+
+  <!-- ── 섹션 1 : 분류별 현황 ── -->
+  <div class="section-divider fade-up">
+    <span class="section-label">01 · CATEGORY BREAKDOWN</span>
+  </div>
+
+  <div class="charts-grid row-3 fade-up" style="margin-bottom:20px;">
+
+    <!-- 도넛 – 위험수준 분포 -->
+    <div class="chart-card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">위험수준 분포</div>
+          <div class="card-subtitle">RISK LEVEL DISTRIBUTION</div>
+        </div>
+        <span class="card-tag tag-red">32 CASES</span>
+      </div>
+      <div class="chart-wrap" style="height:220px; display:flex; align-items:center; justify-content:center;">
+        <canvas id="donutChart" style="max-width:220px;"></canvas>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#ff2841;"></div>상 (高위험) — 17건</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ffab00;"></div>중 (경고) — 12건</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#00e676;"></div>하 (주의) — 3건</div>
+      </div>
+    </div>
+
+    <!-- 대분류별 발생 건수 가로 바 -->
+    <div class="chart-card" style="grid-column: span 2;">
+      <div class="card-header">
+        <div>
+          <div class="card-title">대분류별 이슈 발생 건수</div>
+          <div class="card-subtitle">ISSUES BY CATEGORY</div>
+        </div>
+        <span class="card-tag tag-amber">STACKED</span>
+      </div>
+      <div class="chart-wrap" style="height:252px;">
+        <canvas id="categoryBar"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 섹션 2 : 위험 프로파일 ── -->
+  <div class="section-divider fade-up">
+    <span class="section-label">02 · RISK PROFILE</span>
+  </div>
+
+  <div class="charts-grid row-2 fade-up" style="margin-bottom:20px;">
+
+    <!-- 레이더 차트 -->
+    <div class="chart-card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">카테고리별 위험 레이더</div>
+          <div class="card-subtitle">RISK RADAR PROFILE</div>
+        </div>
+        <span class="card-tag tag-cyan">RADAR</span>
+      </div>
+      <div class="radar-wrap" style="height:300px;">
+        <canvas id="radarChart" style="max-width:340px;"></canvas>
+      </div>
+    </div>
+
+    <!-- 위험수준 누적 막대 -->
+    <div class="chart-card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">카테고리 × 위험수준 매트릭스</div>
+          <div class="card-subtitle">RISK LEVEL PER CATEGORY</div>
+        </div>
+        <span class="card-tag tag-red">STACKED BAR</span>
+      </div>
+      <div class="chart-wrap" style="height:300px;">
+        <canvas id="stackedBar"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 섹션 3 : 페널티 현황 ── -->
+  <div class="section-divider fade-up">
+    <span class="section-label">03 · PENALTY & INCIDENT TIMELINE</span>
+  </div>
+
+  <div class="charts-grid row-2 fade-up" style="margin-bottom:20px;">
+
+    <!-- 날짜별 페널티 건수 라인 차트 -->
+    <div class="chart-card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">날짜별 페널티 발생 추이</div>
+          <div class="card-subtitle">DAILY PENALTY TREND</div>
+        </div>
+        <span class="card-tag tag-red">LINE</span>
+      </div>
+      <div class="chart-wrap" style="height:260px;">
+        <canvas id="lineChart"></canvas>
+      </div>
+    </div>
+
+    <!-- 페널티 유형 파이 -->
+    <div class="chart-card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">페널티 유형 분포</div>
+          <div class="card-subtitle">PENALTY TYPE BREAKDOWN (14 CASES)</div>
+        </div>
+        <span class="card-tag tag-amber">PIE</span>
+      </div>
+      <div class="chart-wrap" style="height:220px; display:flex; align-items:center; justify-content:center;">
+        <canvas id="penaltyPie" style="max-width:220px;"></canvas>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#ff2841;"></div>1 OUT — 5건</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ffab00;"></div>경고/2 OUT — 6건</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#b00030;"></div>중대사고/조사 — 3건</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 섹션 4 : 상세 진행 바 + 사고 로그 ── -->
+  <div class="section-divider fade-up">
+    <span class="section-label">04 · DETAIL ANALYSIS</span>
+  </div>
+
+  <div class="charts-grid row-2 fade-up" style="margin-bottom:20px;">
+
+    <!-- 대분류별 비율 진행 바 -->
+    <div class="chart-card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">대분류별 비중</div>
+          <div class="card-subtitle">CATEGORY SHARE (% OF 32 CASES)</div>
+        </div>
+        <span class="card-tag tag-blue">BAR %</span>
+      </div>
+      <div class="prog-list" id="progList" style="margin-top:8px;"></div>
+    </div>
+
+    <!-- 주요 사고/페널티 로그 테이블 -->
+    <div class="chart-card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">원아웃·중대사고 이벤트 로그</div>
+          <div class="card-subtitle">PENALTY & INCIDENT LOG</div>
+        </div>
+        <span class="card-tag tag-red">14 EVENTS</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="timeline-table">
+          <thead>
+            <tr>
+              <th>날짜</th>
+              <th>위반 유형</th>
+              <th>위치</th>
+              <th>위험</th>
+              <th>페널티</th>
+            </tr>
+          </thead>
+          <tbody id="incidentLog"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 섹션 5 : 위반 유형별 횡비교 ── -->
+  <div class="section-divider fade-up">
+    <span class="section-label">05 · TOP VIOLATIONS</span>
+  </div>
+
+  <div class="charts-grid row-full fade-up">
+    <div class="chart-card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">주요 위반 유형별 발생 건수 비교</div>
+          <div class="card-subtitle">TOP VIOLATION TYPES BY FREQUENCY</div>
+        </div>
+        <span class="card-tag tag-cyan">HORIZONTAL BAR</span>
+      </div>
+      <div class="chart-wrap" style="height:300px;">
+        <canvas id="violationBar"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+/* ═══════════════════════════════════════════
+   Chart.js 전역 설정
+═══════════════════════════════════════════ */
+Chart.defaults.color = '#5a7099';
+Chart.defaults.font.family = "'IBM Plex Mono', 'Noto Sans KR', monospace";
+Chart.defaults.font.size = 11;
+
+const RED   = '#ff2841';
+const AMBER = '#ffab00';
+const GREEN = '#00e676';
+const CYAN  = '#00e5ff';
+const BLUE  = '#2979ff';
+
+const CAT_COLORS = [
+  '#ff2841','#ff6030','#ff8c00','#c45fff',
+  '#00b050','#2979ff','#cc0040','#00b8d4',
+  '#76b900','#ed7d31'
+];
+
+/* ─── 데이터 ─────────────────────────────── */
+const categories = [
+  '추락 위험','충돌·협착','보호구 미착용',
+  '장비·기계','정리정돈','보안·출입',
+  '전기·화재','교통·보행','건강 관리','작업 절차'
+];
+const catCounts   = [6,4,4,3,4,3,2,2,1,3];
+const catHigh     = [5,3,1,2,0,2,2,0,1,1];
+const catMid      = [1,1,3,0,3,1,0,1,0,2];
+const catLow      = [0,0,0,1,1,0,0,1,0,0];
+
+const incidents = [
+  ['03.07(목)','안전고리 미체결','추락위험구역','상','1 OUT'],
+  ['03.10(화)','안전고리 미체결','비계 설치 구간','상','1 OUT'],
+  ['03.11(수)','T/L 동승자 미흡','7F D53','중','2 OUT'],
+  ['03.11(수)','개인 촬영 행위','6F F39','중','2 OUT'],
+  ['03.12(목)','와이어 꼬임','7F A58','중','경고'],
+  ['03.12(목)','불안전한 자세','7F J39','상','경고'],
+  ['03.16(월)','안전고리 미체결','상부 이동 구간','상','1 OUT'],
+  ['03.16(월)','시선 방향 미조치','현장 내','중','2 OUT'],
+  ['03.17(화)','추락방지 미조치','7F M/44','상','1 OUT'],
+  ['03.18(수)','T/L 동체이음 미조치','2F L48','중','경고'],
+  ['03.19(목)','유도도 미흡','7F F39','중','경고'],
+  ['03.20(금)','대차 충돌 사고','이동 구간','상','사고조사'],
+  ['03.23(토)','그레이팅 추락','해체 구간','상','중대사고'],
+  ['03.23(토)','보안경 미착용','금속커튼박스','상','2 OUT'],
+];
+
+const dailyData = {
+  labels: ['03.07','03.10','03.11','03.12','03.13','03.14','03.15','03.16','03.17','03.18','03.19','03.20','03.21','03.22','03.23'],
+  counts: [1,1,2,2,0,0,0,2,1,1,1,1,0,0,2]
+};
+
+const violations = [
+  {name:'안전고리 미체결', cnt:5, color:RED},
+  {name:'T/L 운행 관련', cnt:3, color:'#ff6030'},
+  {name:'보호구 미착용', cnt:4, color:AMBER},
+  {name:'자재·정리 불량', cnt:4, color:'#ed7d31'},
+  {name:'대차·충돌 위험', cnt:4, color:'#c45fff'},
+  {name:'보안 위반', cnt:3, color:BLUE},
+  {name:'전기·화재 위험', cnt:2, color:'#cc0040'},
+  {name:'추락방지 미조치', cnt:2, color:'#ff2841'},
+  {name:'양중 계획 미흡', cnt:2, color:CYAN},
+  {name:'보행 안전 미준수', cnt:2, color:GREEN},
+];
+
+/* ─── 1. 도넛 차트 ─────────────────────── */
+new Chart(document.getElementById('donutChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['상 (고위험)', '중 (경고)', '하 (주의)'],
+    datasets: [{
+      data: [17, 12, 3],
+      backgroundColor: [
+        'rgba(255,40,65,0.85)',
+        'rgba(255,171,0,0.82)',
+        'rgba(0,230,118,0.75)',
+      ],
+      borderColor: ['#080b12','#080b12','#080b12'],
+      borderWidth: 3,
+      hoverOffset: 8,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '68%',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#0d1220',
+        borderColor: '#1e2d4a',
+        borderWidth: 1,
+        titleColor: '#e8edf5',
+        bodyColor: '#8a9bbf',
+        padding: 10,
+        callbacks: {
+          label: ctx => ` ${ctx.parsed}건 (${(ctx.parsed/32*100).toFixed(1)}%)`,
+        }
+      }
+    },
+    animation: { animateRotate: true, duration: 1200, easing: 'easeInOutCubic' }
+  }
+});
+
+/* ─── 2. 카테고리 가로 바 (누적) ────────── */
+new Chart(document.getElementById('categoryBar'), {
+  type: 'bar',
+  data: {
+    labels: categories,
+    datasets: [
+      { label:'상', data: catHigh, backgroundColor:'rgba(255,40,65,0.8)',  borderRadius:2, borderSkipped:false },
+      { label:'중', data: catMid,  backgroundColor:'rgba(255,171,0,0.75)', borderRadius:2, borderSkipped:false },
+      { label:'하', data: catLow,  backgroundColor:'rgba(0,230,118,0.65)', borderRadius:2, borderSkipped:false },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    indexAxis: 'y',
+    scales: {
+      x: {
+        stacked: true,
+        grid: { color: 'rgba(30,45,74,0.5)', drawBorder: false },
+        ticks: { color:'#5a7099', stepSize:1 },
+        border: { display: false }
+      },
+      y: {
+        stacked: true,
+        grid: { display: false },
+        ticks: { color:'#8a9bbf', font:{ size:11 } },
+        border: { display: false }
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: { color:'#8a9bbf', boxWidth:10, boxHeight:10, padding:16, font:{size:11} }
+      },
+      tooltip: {
+        backgroundColor:'#0d1220', borderColor:'#1e2d4a', borderWidth:1,
+        titleColor:'#e8edf5', bodyColor:'#8a9bbf', padding:10,
+      }
+    },
+    animation: { duration:1000, easing:'easeOutCubic' }
+  }
+});
+
+/* ─── 3. 레이더 차트 ─────────────────────── */
+new Chart(document.getElementById('radarChart'), {
+  type: 'radar',
+  data: {
+    labels: categories.map(c => c.length > 6 ? c.slice(0,6) : c),
+    datasets: [
+      {
+        label: '총 케이스',
+        data: catCounts,
+        borderColor: 'rgba(0,229,255,0.7)',
+        backgroundColor: 'rgba(0,229,255,0.07)',
+        borderWidth: 1.5,
+        pointBackgroundColor: CYAN,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      },
+      {
+        label: '위험수준 상',
+        data: catHigh,
+        borderColor: 'rgba(255,40,65,0.7)',
+        backgroundColor: 'rgba(255,40,65,0.06)',
+        borderWidth: 1.5,
+        pointBackgroundColor: RED,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: {
+      r: {
+        min: 0, max: 6,
+        grid: { color:'rgba(30,45,74,0.6)' },
+        angleLines: { color:'rgba(30,45,74,0.6)' },
+        pointLabels: { color:'#8a9bbf', font:{size:11} },
+        ticks: { color:'transparent', backdropColor:'transparent', stepSize:2 }
+      }
+    },
+    plugins: {
+      legend: {
+        position:'bottom',
+        labels:{ color:'#8a9bbf', boxWidth:10, boxHeight:10, padding:16, font:{size:11} }
+      },
+      tooltip:{
+        backgroundColor:'#0d1220', borderColor:'#1e2d4a', borderWidth:1,
+        titleColor:'#e8edf5', bodyColor:'#8a9bbf', padding:10,
+      }
+    },
+    animation: { duration:1200, easing:'easeInOutCubic' }
+  }
+});
+
+/* ─── 4. 누적 막대 (카테고리×위험수준) ─── */
+new Chart(document.getElementById('stackedBar'), {
+  type: 'bar',
+  data: {
+    labels: categories.map(c => c.slice(0,5)),
+    datasets: [
+      { label:'상', data:catHigh, backgroundColor:'rgba(255,40,65,0.8)',  borderRadius:[2,2,0,0] },
+      { label:'중', data:catMid,  backgroundColor:'rgba(255,171,0,0.75)', borderRadius:[2,2,0,0] },
+      { label:'하', data:catLow,  backgroundColor:'rgba(0,230,118,0.65)', borderRadius:[2,2,0,0] },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: {
+      x: {
+        stacked:true,
+        grid:{display:false},
+        ticks:{ color:'#8a9bbf', font:{size:10} },
+        border:{display:false}
+      },
+      y: {
+        stacked:true,
+        grid:{color:'rgba(30,45,74,0.5)', drawBorder:false},
+        ticks:{ color:'#5a7099', stepSize:1 },
+        border:{display:false}
+      }
+    },
+    plugins:{
+      legend:{ position:'bottom', labels:{color:'#8a9bbf', boxWidth:10, boxHeight:10, padding:14, font:{size:11}} },
+      tooltip:{
+        backgroundColor:'#0d1220', borderColor:'#1e2d4a', borderWidth:1,
+        titleColor:'#e8edf5', bodyColor:'#8a9bbf', padding:10,
+      }
+    },
+    animation:{duration:1000, easing:'easeOutCubic'}
+  }
+});
+
+/* ─── 5. 날짜별 라인 차트 ────────────────── */
+new Chart(document.getElementById('lineChart'), {
+  type: 'line',
+  data: {
+    labels: dailyData.labels,
+    datasets: [{
+      label: '페널티/사고 건수',
+      data: dailyData.counts,
+      borderColor: RED,
+      backgroundColor: 'rgba(255,40,65,0.08)',
+      borderWidth: 2,
+      pointBackgroundColor: dailyData.counts.map(v => v > 1 ? RED : AMBER),
+      pointBorderColor: '#080b12',
+      pointBorderWidth: 2,
+      pointRadius: dailyData.counts.map(v => v > 0 ? 5 : 3),
+      pointHoverRadius: 8,
+      tension: 0.35,
+      fill: true,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: {
+      x: {
+        grid:{color:'rgba(30,45,74,0.4)', drawBorder:false},
+        ticks:{color:'#5a7099', font:{size:10}},
+        border:{display:false}
+      },
+      y: {
+        min:0, max:3,
+        grid:{color:'rgba(30,45,74,0.4)', drawBorder:false},
+        ticks:{color:'#5a7099', stepSize:1},
+        border:{display:false}
+      }
+    },
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'#0d1220', borderColor:'#1e2d4a', borderWidth:1,
+        titleColor:'#e8edf5', bodyColor:'#8a9bbf', padding:10,
+        callbacks:{ label: ctx => ` ${ctx.parsed.y}건 발생` }
+      }
+    },
+    animation:{duration:1400, easing:'easeInOutCubic'}
+  }
+});
+
+/* ─── 6. 페널티 파이 ─────────────────────── */
+new Chart(document.getElementById('penaltyPie'), {
+  type: 'doughnut',
+  data: {
+    labels: ['1 OUT','경고·2 OUT','사고조사·중대'],
+    datasets: [{
+      data: [5,6,3],
+      backgroundColor:[
+        'rgba(255,40,65,0.85)',
+        'rgba(255,171,0,0.82)',
+        'rgba(180,0,48,0.75)',
+      ],
+      borderColor:['#080b12','#080b12','#080b12'],
+      borderWidth:3,
+      hoverOffset:8,
+    }]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    cutout:'68%',
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'#0d1220', borderColor:'#1e2d4a', borderWidth:1,
+        titleColor:'#e8edf5', bodyColor:'#8a9bbf', padding:10,
+        callbacks:{ label: ctx => ` ${ctx.parsed}건 (${(ctx.parsed/14*100).toFixed(1)}%)` }
+      }
+    },
+    animation:{animateRotate:true, duration:1200, easing:'easeInOutCubic'}
+  }
+});
+
+/* ─── 7. 진행 바 렌더링 ──────────────────── */
+const progList = document.getElementById('progList');
+const maxCnt = Math.max(...catCounts);
+const progColors = CAT_COLORS;
+catCounts.forEach((cnt, i) => {
+  const pct = (cnt / 32 * 100).toFixed(1);
+  const div = document.createElement('div');
+  div.className = 'prog-item';
+  div.innerHTML = `
+    <div class="prog-meta">
+      <span class="prog-name">${categories[i]}</span>
+      <span class="prog-val">${cnt}건 (${pct}%)</span>
+    </div>
+    <div class="prog-track">
+      <div class="prog-fill" data-w="${pct}" style="background:${progColors[i]};"></div>
+    </div>`;
+  progList.appendChild(div);
+});
+
+/* ─── 8. 인시던트 로그 테이블 ─────────────── */
+const tbody = document.getElementById('incidentLog');
+incidents.forEach(([date,type,loc,risk,penalty]) => {
+  const badgeClass = penalty.includes('1 OUT') ? 'badge-1out'
+                   : penalty.includes('2 OUT') ? 'badge-2out'
+                   : penalty.includes('중대')   ? 'badge-major'
+                   : penalty.includes('사고')   ? 'badge-major'
+                   : 'badge-warn';
+  const riskClass = risk === '상' ? 'high' : risk === '중' ? 'mid' : 'low';
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-muted); white-space:nowrap;">${date}</td>
+    <td style="color:var(--text-primary); font-size:12px;">${type}</td>
+    <td style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--text-muted);">${loc}</td>
+    <td><span class="risk-dot ${riskClass}">${risk}</span></td>
+    <td><span class="badge ${badgeClass}">${penalty}</span></td>`;
+  tbody.appendChild(tr);
+});
+
+/* ─── 9. 위반 유형 가로 바 ───────────────── */
+new Chart(document.getElementById('violationBar'), {
+  type:'bar',
+  data:{
+    labels: violations.map(v=>v.name),
+    datasets:[{
+      label:'발생 건수',
+      data: violations.map(v=>v.cnt),
+      backgroundColor: violations.map(v => v.color + 'cc'),
+      borderColor: violations.map(v => v.color),
+      borderWidth:1,
+      borderRadius:3,
+      borderSkipped:false,
+    }]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    indexAxis:'y',
+    scales:{
+      x:{
+        grid:{color:'rgba(30,45,74,0.5)', drawBorder:false},
+        ticks:{color:'#5a7099', stepSize:1},
+        border:{display:false},
+        max:6,
+      },
+      y:{
+        grid:{display:false},
+        ticks:{color:'#8a9bbf', font:{size:12}},
+        border:{display:false}
+      }
+    },
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'#0d1220', borderColor:'#1e2d4a', borderWidth:1,
+        titleColor:'#e8edf5', bodyColor:'#8a9bbf', padding:10,
+        callbacks:{ label: ctx=>`  ${ctx.parsed.x}건 발생` }
+      }
+    },
+    animation:{duration:1000, easing:'easeOutCubic'}
+  }
+});
+
+/* ═══════════════════════════════════════════
+   스크롤 애니메이션 + 진행 바 트리거
+═══════════════════════════════════════════ */
+function initAnimations() {
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        // 진행 바가 화면에 들어오면 애니메이션
+        entry.target.querySelectorAll('.prog-fill').forEach(el => {
+          const w = el.dataset.w;
+          setTimeout(() => { el.style.transform = `scaleX(${w/100})`; }, 200);
+        });
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+}
+
+// 페이지 로드 시 초기화
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(initAnimations, 100);
+
+  // 첫 번째 진행 바는 즉시 실행
+  setTimeout(() => {
+    document.querySelectorAll('.prog-fill').forEach(el => {
+      const w = el.dataset.w;
+      el.style.transform = `scaleX(${w/100})`;
+    });
+  }, 800);
+});
+</script>
+</body>
+</html>
