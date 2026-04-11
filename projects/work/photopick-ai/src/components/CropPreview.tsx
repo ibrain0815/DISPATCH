@@ -20,7 +20,129 @@
 import { useState, useEffect, useRef } from 'react';
 import { usePhotoStore } from '../store/usePhotoStore';
 import { downloadAsZip } from '../utils/zip';
-import type { AspectRatio } from '../types';
+import type { AspectRatio, Grade, DetailedAnalysis } from '../types';
+
+// ── 상세 평가 패널 (하단 바 오른쪽 표시용) ─────────────────────────────────
+
+const GRADE_COLORS: Record<Grade, string> = {
+  S: 'bg-yellow-400 text-black',
+  A: 'bg-green-500 text-white',
+  B: 'bg-blue-500 text-white',
+  C: 'bg-gray-400 text-white',
+  D: 'bg-red-400 text-white',
+};
+
+const GRADE_COMMENT: Record<Grade, string> = {
+  S: '완성도 높은 전신 패션 사진입니다.',
+  A: '좋은 전신 사진입니다.',
+  B: '기본 품질을 갖춘 사진입니다.',
+  C: '아쉬운 부분이 있는 사진입니다.',
+  D: '품질이 낮거나 인물이 없는 사진입니다.',
+};
+
+function barColor(score: number) {
+  if (score >= 80) return 'bg-green-500';
+  if (score >= 60) return 'bg-blue-500';
+  if (score >= 40) return 'bg-yellow-400';
+  return 'bg-red-400';
+}
+
+function getScoreItems(a: DetailedAnalysis) {
+  const items = [
+    { label: '화질', score: a.qualityScore,     icon: '📷' },
+    { label: '구도', score: a.compositionScore, icon: '📐' },
+    { label: '조명', score: a.lightingScore,    icon: '💡' },
+    { label: '배경', score: a.backgroundScore,  icon: '🌿' },
+    { label: '표정', score: a.expressionScore,  icon: '😊' },
+  ];
+  if (a.isFullBody) {
+    items.push(
+      { label: '포즈', score: a.poseScore,    icon: '🧍' },
+      { label: '패션', score: a.fashionScore, icon: '👗' },
+    );
+  }
+  return items;
+}
+
+interface ScorePanelProps {
+  fileName: string;
+  analysis: DetailedAnalysis;
+  onClose: () => void;
+}
+
+function ScorePanel({ fileName, analysis: a, onClose }: ScorePanelProps) {
+  const items = getScoreItems(a);
+  return (
+    <div className="flex-1 min-w-0 max-w-sm border-l border-gray-100 pl-4 flex flex-col">
+      {/* 헤더 */}
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className={`flex-shrink-0 text-sm font-black px-2 py-0.5 rounded-lg ${GRADE_COLORS[a.grade]}`}>
+            {a.grade}
+          </span>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold text-gray-800 truncate">{fileName}</p>
+            <p className="text-xs text-gray-400">
+              {a.isFullBody ? '전신' : '클로즈업'} · 종합 {a.totalScore}점
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          className="flex-shrink-0 text-gray-300 hover:text-gray-500 text-sm ml-2"
+        >
+          ✕
+        </button>
+      </div>
+
+      <p className="text-xs text-gray-500 mb-2">{GRADE_COMMENT[a.grade]}</p>
+
+      {/* 점수 바 */}
+      <div className="space-y-1.5 flex-1 overflow-y-auto">
+        {items.map(({ label, score, icon }) => (
+          <div key={label}>
+            <div className="flex items-center justify-between mb-0.5">
+              <span className="text-xs text-gray-600 flex items-center gap-1">
+                <span>{icon}</span><span>{label}</span>
+              </span>
+              <span className={`text-xs font-bold ${
+                score >= 70 ? 'text-green-600' :
+                score >= 50 ? 'text-blue-600' : 'text-red-500'
+              }`}>{score}점</span>
+            </div>
+            <div className="w-full bg-gray-100 rounded-full h-1.5">
+              <div
+                className={`h-1.5 rounded-full ${barColor(score)}`}
+                style={{ width: `${score}%` }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 감점 + 팁 */}
+      {a.penalties.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {a.penalties.map((p) => (
+            <span key={p.type} className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">
+              {p.description} ({p.score}점)
+            </span>
+          ))}
+        </div>
+      )}
+      {a.tips.length > 0 && (
+        <ul className="mt-1.5 space-y-0.5">
+          {a.tips.slice(0, 2).map((tip, i) => (
+            <li key={i} className="text-xs text-gray-400 flex gap-1">
+              <span className="text-blue-300 flex-shrink-0">›</span>
+              <span className="line-clamp-1">{tip}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 /** 지원하는 인스타그램 비율 목록 */
 const RATIOS: AspectRatio[] = ['4:5', '1:1', '1.91:1', '9:16'];
@@ -47,11 +169,13 @@ const PREVIEW_H = 240;
 
 export function CropPreview() {
   // ── Zustand 스토어 구독 ────────────────────────────────────────────────────
-  const selectedIds  = usePhotoStore((s) => s.selectedIds);  // 선택된 사진 ID Set
-  const photos       = usePhotoStore((s) => s.photos);       // 전체 사진 Map
-  const cropRatio    = usePhotoStore((s) => s.cropRatio);    // 현재 선택된 크롭 비율
-  const setCropRatio = usePhotoStore((s) => s.setCropRatio); // 비율 변경 함수
-  const stage        = usePhotoStore((s) => s.stage);        // 파이프라인 단계
+  const selectedIds  = usePhotoStore((s) => s.selectedIds);
+  const photos       = usePhotoStore((s) => s.photos);
+  const cropRatio    = usePhotoStore((s) => s.cropRatio);
+  const setCropRatio = usePhotoStore((s) => s.setCropRatio);
+  const stage        = usePhotoStore((s) => s.stage);
+  const focusedId    = usePhotoStore((s) => s.focusedId);
+  const setFocusedId = usePhotoStore((s) => s.setFocusedId);
 
   // ── 로컬 상태 ─────────────────────────────────────────────────────────────
   const [downloading,      setDownloading]      = useState(false); // 다운로드 진행 중 여부
@@ -59,10 +183,10 @@ export function CropPreview() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null); // 미리보기 캔버스 DOM 참조
 
-  // 미리보기에 표시할 사진: 선택된 사진들 중 첫 번째
-  const previewPhoto = selectedIds.size > 0
-    ? photos.get(Array.from(selectedIds)[0])
-    : null;
+  // 미리보기에 표시할 사진: 포커스된 사진 → 없으면 선택된 첫 번째
+  const focusedPhoto  = focusedId ? photos.get(focusedId) : null;
+  const previewPhoto  = focusedPhoto
+    ?? (selectedIds.size > 0 ? photos.get(Array.from(selectedIds)[0]) : null);
 
   // ── 캔버스 렌더링 ──────────────────────────────────────────────────────────
   // previewPhoto 또는 cropRatio가 바뀔 때마다 캔버스를 다시 그립니다
@@ -207,7 +331,7 @@ export function CropPreview() {
   return (
     // 화면 하단에 고정되는 바 (sticky bottom-0)
     <div className="sticky bottom-0 bg-white border-t border-gray-200 shadow-xl">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex flex-wrap gap-6 items-center">
+      <div className="max-w-6xl mx-auto px-6 py-4 flex gap-4 items-start">
 
         {/* ── 크롭 미리보기 캔버스 ─────────────────────────────────────────── */}
         <div className="flex-shrink-0">
@@ -221,46 +345,49 @@ export function CropPreview() {
           />
         </div>
 
-        {/* ── 비율 선택 버튼 + 다운로드 버튼 ──────────────────────────────── */}
-        <div className="flex-1 min-w-0">
-          <p className="text-xs text-gray-500 mb-2 font-medium">인스타그램 비율 선택</p>
+        {/* ── 상세 평가 패널 (사진 포커스 시 표시) ────────────────────────── */}
+        {focusedPhoto?.analysis && (
+          <ScorePanel
+            fileName={focusedPhoto.fileName}
+            analysis={focusedPhoto.analysis}
+            onClose={() => setFocusedId(null)}
+          />
+        )}
 
-          {/* 비율 선택 버튼 그룹 */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {RATIOS.map((r) => (
-              <button
-                key={r}
-                onClick={() => setCropRatio(r)}
-                className={`px-3 py-2 rounded-lg text-sm border transition-colors font-medium
-                  ${cropRatio === r
-                    ? 'bg-blue-500 text-white border-blue-500 shadow-sm'   // 선택된 버튼
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:bg-blue-50' // 미선택
-                  }`}
-              >
-                {RATIO_LABELS[r]}
-                {/* 비율 값도 작게 표시 (예: "4:5") */}
-                <span className="block text-xs opacity-60 font-normal">{r}</span>
-              </button>
-            ))}
+        {/* ── 비율 선택 버튼 + 다운로드 버튼 ──────────────────────────────── */}
+        <div className="flex-shrink-0 ml-auto flex flex-col justify-between" style={{ minWidth: 220 }}>
+          <div>
+            <p className="text-xs text-gray-500 mb-2 font-medium">인스타그램 비율 선택</p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {RATIOS.map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setCropRatio(r)}
+                  className={`px-3 py-2 rounded-lg text-sm border transition-colors font-medium
+                    ${cropRatio === r
+                      ? 'bg-blue-500 text-white border-blue-500 shadow-sm'
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                    }`}
+                >
+                  {RATIO_LABELS[r]}
+                  <span className="block text-xs opacity-60 font-normal">{r}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* 선택 수 표시 + 다운로드 버튼 */}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-2">
             <p className="text-sm text-gray-500">
-              {selectedIds.size > 0
-                ? `${selectedIds.size}장 선택됨`
-                : '그리드에서 사진을 선택하세요'}
+              {selectedIds.size > 0 ? `${selectedIds.size}장 선택됨` : '그리드에서 사진을 선택하세요'}
             </p>
             <button
               onClick={handleDownload}
-              disabled={selectedIds.size === 0 || downloading} // 선택 없거나 다운로드 중이면 비활성
-              className="ml-auto px-6 py-2.5 bg-blue-600 text-white rounded-xl font-medium
+              disabled={selectedIds.size === 0 || downloading}
+              className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-medium
                          hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed
-                         transition-colors min-w-[160px] text-sm"
+                         transition-colors text-sm"
             >
-              {downloading
-                ? `다운로드 중... ${downloadProgress}%` // 진행률 표시
-                : `ZIP 다운로드 (${selectedIds.size}장)`}
+              {downloading ? `다운로드 중... ${downloadProgress}%` : `ZIP 다운로드 (${selectedIds.size}장)`}
             </button>
           </div>
         </div>

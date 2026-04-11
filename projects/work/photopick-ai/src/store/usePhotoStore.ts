@@ -46,7 +46,10 @@ interface PhotoStore {
   updateProgress: (current: number, total: number, label: string) => void;
 
   // ── UI 상태 액션 ──────────────────────────────────────────────────────────
+  focusedId: string | null;             // 상세 패널 표시 중인 사진 id
+  setFocusedId: (id: string | null) => void;
   toggleSelect: (id: string) => void;   // 사진 선택/해제 토글
+  selectMany: (ids: string[]) => void;  // 여러 사진 한꺼번에 추가 선택 (드래그 선택용)
   selectAll: () => void;                // 현재 추천 사진 전체 선택
   deselectAll: () => void;              // 전체 선택 해제
   setCropRatio: (ratio: AspectRatio) => void;
@@ -73,6 +76,7 @@ export const usePhotoStore = create<PhotoStore>((set, get) => ({
   stage: 'idle',
   progress: { current: 0, total: 0, label: '' },
   selectedIds: new Set(),
+  focusedId: null,
   cropRatio: '4:5',         // 기본 비율: 세로 4:5 (인스타 피드 표준)
   activeGrade: 'ALL',
   summary: { ...INITIAL_SUMMARY },
@@ -126,6 +130,7 @@ export const usePhotoStore = create<PhotoStore>((set, get) => ({
       stage: 'idle',
       progress: { current: 0, total: 0, label: '' },
       selectedIds: new Set(),
+      focusedId: null,
       summary: { ...INITIAL_SUMMARY },
     }),
 
@@ -154,6 +159,14 @@ export const usePhotoStore = create<PhotoStore>((set, get) => ({
   },
 
   deselectAll: () => set({ selectedIds: new Set() }),
+
+  selectMany: (ids) => {
+    const selectedIds = new Set(get().selectedIds);
+    ids.forEach((id) => selectedIds.add(id));
+    set({ selectedIds });
+  },
+
+  setFocusedId: (id) => set({ focusedId: id }),
 
   setCropRatio: (ratio) => set({ cropRatio: ratio }),
 
