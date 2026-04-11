@@ -4,6 +4,8 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // Electron 패키징 시 file:// 프로토콜에서 상대 경로 필요
+  base: './',
   worker: {
     format: 'es',
   },
