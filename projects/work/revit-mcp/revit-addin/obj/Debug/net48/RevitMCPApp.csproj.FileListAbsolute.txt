@@ -1,0 +1,11 @@
+C:\Users\dim96\Downloads\DISPATCH\projects\work\revit-mcp\revit-addin\obj\Debug\net48\RevitMCPApp.csproj.AssemblyReference.cache
+C:\Users\dim96\Downloads\DISPATCH\projects\work\revit-mcp\revit-addin\obj\Debug\net48\RevitMCPApp.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\dim96\Downloads\DISPATCH\projects\work\revit-mcp\revit-addin\obj\Debug\net48\RevitMCPApp.AssemblyInfoInputs.cache
+C:\Users\dim96\Downloads\DISPATCH\projects\work\revit-mcp\revit-addin\obj\Debug\net48\RevitMCPApp.AssemblyInfo.cs
+C:\Users\dim96\Downloads\DISPATCH\projects\work\revit-mcp\revit-addin\obj\Debug\net48\RevitMCPApp.csproj.CoreCompileInputs.cache
+C:\Users\dim96\Downloads\DISPATCH\projects\work\revit-mcp\revit-addin\obj\Debug\net48\RevitMCPApp.sourcelink.json
+C:\Users\dim96\AppData\Roaming\Autodesk\Revit\Addins\2027\RevitMCP\net48\RevitMCPApp.dll
+C:\Users\dim96\AppData\Roaming\Autodesk\Revit\Addins\2027\RevitMCP\net48\RevitMCPApp.pdb
+C:\Users\dim96\Downloads\DISPATCH\projects\work\revit-mcp\revit-addin\obj\Debug\net48\RevitMCP.42AA6325.Up2Date
+C:\Users\dim96\Downloads\DISPATCH\projects\work\revit-mcp\revit-addin\obj\Debug\net48\RevitMCPApp.dll
+C:\Users\dim96\Downloads\DISPATCH\projects\work\revit-mcp\revit-addin\obj\Debug\net48\RevitMCPApp.pdb

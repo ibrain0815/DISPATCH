@@ -1,0 +1,5 @@
+is_global = true
+build_property.RootNamespace = RevitMCP
+build_property.ProjectDir = C:\Users\dim96\Downloads\DISPATCH\projects\work\revit-mcp\revit-addin\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 

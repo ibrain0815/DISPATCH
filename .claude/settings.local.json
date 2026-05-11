@@ -4,5 +4,6 @@
       "Bash(npm run:*)",
       "WebFetch(domain:www.revitapidocs.com)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": ["revit"]
 }

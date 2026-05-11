@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>RevitMCPApp</AssemblyName>
+    <RootNamespace>RevitMCP</RootNamespace>
+    <Nullable>enable</Nullable>
+    <LangVersion>9.0</LangVersion>
+    <!-- 빌드 결과를 Revit 애드인 폴더로 직접 복사 -->
+    <OutputPath>$(AppData)\Autodesk\Revit\Addins\2027\RevitMCP\</OutputPath>
+  </PropertyGroup>
+
+  <!-- Revit API 참조 (경로는 설치 버전에 맞게 수정) -->
+  <ItemGroup>
+    <Reference Include="RevitAPI">
+      <HintPath>D:\Autodesk\Revit 2027\RevitAPI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="RevitAPIUI">
+      <HintPath>D:\Autodesk\Revit 2027\RevitAPIUI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Newtonsoft.Json (JSON 처리) -->
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <!-- 빌드 후 .addin 파일 복사 -->
+  <Target Name="CopyAddin" AfterTargets="Build">
+    <Copy SourceFiles="RevitMCPApp.addin"
+          DestinationFolder="$(AppData)\Autodesk\Revit\Addins\2027\" />
+  </Target>
+
+</Project>
