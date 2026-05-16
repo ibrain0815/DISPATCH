@@ -1,0 +1,22 @@
+# Electron / App 빌드 산출물
+projects/work/photopick-ai/release/
+projects/**/release/
+projects/**/dist/
+**/*.exe
+**/*.asar
+**/*.dmg
+**/*.AppImage
+
+# Node modules
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp / lock files
+~$*
