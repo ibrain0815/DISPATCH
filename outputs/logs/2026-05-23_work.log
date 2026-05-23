@@ -1,0 +1,28 @@
+[2026-05-23 작업 로그 - changes-2026-05-23.log]
+
+■ 작업 일자: 2026-05-23 14:45
+■ 작업자: Antigravity (AI Coding Assistant)
+■ 대상 프로젝트: DISPATCH
+■ 작업 내용: outputs/ 최상위 파일 정리 및 구조화
+
+[상세 변경 사항]
+
+1. outputs/ 최상위 경로의 보고서/분석/가이드 파일 (11개)을 outputs/reports/ 폴더로 이동 완료:
+   - 2026-04-29_Revit배관설계MEP완벽가이드_V1.md ➜ outputs/reports/2026-04-29_Revit배관설계MEP완벽가이드_V1.md
+   - 2026-05-07_BIM관련업체취업전략_완벽가이드_V1.md ➜ outputs/reports/2026-05-07_BIM관련업체취업전략_완벽가이드_V1.md
+   - 2026-05-07_Revit_AI자동화기능_분류소개_완벽가이드_V1.md ➜ outputs/reports/2026-05-07_Revit_AI자동화기능_분류소개_완벽가이드_V1.md
+   - 2026-05-07_Revit_API개발환경_개발방법_완벽가이드_V1.md ➜ outputs/reports/2026-05-07_Revit_API개발환경_개발방법_완벽가이드_V1.md
+   - 2026-05-07_건설현장BIM_Revit_설계_장단점활용방법_V1.md ➜ outputs/reports/2026-05-07_건설현장BIM_Revit_설계_장단점활용방법_V1.md
+   - 2026-05-11_OSC모듈러건설_해외사례_미래전망_분석_V1.md ➜ outputs/reports/2026-05-11_OSC모듈러건설_해외사례_미래전망_분석_V1.md
+   - 2026-05-13_개인사업자_저금리대출_자금마련_종류방법_완벽가이드_V1.md ➜ outputs/reports/2026-05-13_개인사업자_저금리대출_자금마련_종류방법_완벽가이드_V1.md
+   - 2026-05-16_반도체공장_OSC건축_활용사례_분석_V1.md ➜ outputs/reports/2026-05-16_반도체공장_OSC건축_활용사례_분석_V1.md
+   - 2026-05-17_김중기_경력프로필_종합분석_V1.md ➜ outputs/reports/2026-05-17_김중기_경력프로필_종합분석_V1.md
+   - 2026-05-18_OSC경력전환종합가이드.md ➜ outputs/reports/2026-05-18_OSC경력전환종합가이드.md
+   - 2026-05-19_CO2아크용접상세가이드.md ➜ outputs/reports/2026-05-19_CO2아크용접상세가이드.md
+
+2. outputs/ 최상위 경로의 기획서 파일 (1개)을 outputs/plans/ 폴더로 이동 완료:
+   - OSC_경력전환_기획서_V1.docx ➜ outputs/plans/OSC_경력전환_기획서_V1.docx
+
+[검증 결과]
+- outputs/ 최상위 경로의 모든 개별 파일이 지침에 정의된 하위 폴더(reports, plans)로 예외 없이 이동되었습니다.
+- outputs/ 폴더 하위에는 logs/, plans/, reports/ 디렉토리 3개만 존재하며, 깔끔하게 정리되었습니다.

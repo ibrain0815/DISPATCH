@@ -1,0 +1,38 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "projects", "projects", "{17245595-230B-9055-A944-863F0DDDA8E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "work", "work", "{EB74DF68-7CB9-4384-2F41-5388EF6C5AFC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "revit-mcp", "revit-mcp", "{B035AD54-8096-AAC3-006B-BB246642656A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "revit-addin", "revit-addin", "{87D63039-41B2-EA19-CF95-D1778422E476}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RevitMCPApp", "projects\work\revit-mcp\revit-addin\RevitMCPApp.csproj", "{D0C867C3-9ED2-3DBA-C0AD-CF46A382DDE7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D0C867C3-9ED2-3DBA-C0AD-CF46A382DDE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0C867C3-9ED2-3DBA-C0AD-CF46A382DDE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0C867C3-9ED2-3DBA-C0AD-CF46A382DDE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0C867C3-9ED2-3DBA-C0AD-CF46A382DDE7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EB74DF68-7CB9-4384-2F41-5388EF6C5AFC} = {17245595-230B-9055-A944-863F0DDDA8E8}
+		{B035AD54-8096-AAC3-006B-BB246642656A} = {EB74DF68-7CB9-4384-2F41-5388EF6C5AFC}
+		{87D63039-41B2-EA19-CF95-D1778422E476} = {B035AD54-8096-AAC3-006B-BB246642656A}
+		{D0C867C3-9ED2-3DBA-C0AD-CF46A382DDE7} = {87D63039-41B2-EA19-CF95-D1778422E476}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B8D964DD-D7C7-416D-824F-1F5026F830FF}
+	EndGlobalSection
+EndGlobal
