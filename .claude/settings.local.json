@@ -2,8 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(npm run:*)",
-      "WebFetch(domain:www.revitapidocs.com)"
+      "WebFetch(domain:www.revitapidocs.com)",
+      "mcp__revit__create_revit_column"
     ]
   },
-  "enabledMcpjsonServers": ["revit"]
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "revit"
+  ]
 }
